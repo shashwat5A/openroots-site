@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpenRoots | Herbal teas built around how you feel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Six herbal teas, each built around one outcome. Whole roots and herbs, nothing to hide behind.">
+
+<style>
+  body { margin: 0; background: #F7F6F2; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { opacity: 0.7; }
+  .or-btn-primary:hover { background: #28402F !important; opacity: 1 !important; }
+
+  @keyframes orDraw {
+    to { stroke-dashoffset: 0; }
+  }
+  .or-root-path {
+    stroke-dasharray: 520;
+    stroke-dashoffset: 520;
+    animation: orDraw 1.6s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .or-root-path { animation: none !important; stroke-dashoffset: 0 !important; }
+  }
+
+  /* TEA CAROUSEL: pure CSS, driven by hidden radio inputs (no JS, no scroll dependency) */
+  .or-car-radio { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+  .or-carousel { position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; padding: 4px 0 30px; }
+  .or-car-arrow-slot { position: relative; z-index: 20; width: 44px; height: 44px; flex-shrink: 0; }
+  .or-car-arrow {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid rgba(28,33,29,0.14); background: #FFFFFF; cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .or-car-arrow:hover { background: #EFEEE6; border-color: rgba(28,33,29,0.26); }
+  .or-car-stage { position: relative; z-index: 1; overflow: hidden; border-radius: 24px; width: min(460px, 82vw); height: 470px; }
+  .or-car-card {
+    position: absolute; top: 0; left: 50%; width: 300px; margin-left: -150px; height: 100%;
+    display: flex; flex-direction: column; box-sizing: border-box;
+    border-radius: 24px; border: 1px solid rgba(28,33,29,0.08); background: #FFFFFF; overflow: hidden;
+    cursor: pointer; text-decoration: none; color: inherit;
+    transform: translateX(0) scale(0.8); opacity: 0; z-index: 1; pointer-events: none;
+    transition: transform 0.5s cubic-bezier(0.22,0.61,0.36,1), opacity 0.5s ease, box-shadow 0.5s ease;
+  }
+  .or-car-visual { height: 230px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .or-car-body { padding: 24px 30px 30px; display: flex; flex-direction: column; cursor: default; }
+  .or-car-dots { display: flex; justify-content: center; gap: 9px; }
+  .or-car-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(28,33,29,0.22); display: inline-block; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; }
+  .or-car-dot:hover { background: #33513F; }
+
+  #tea-r0:checked ~ .or-carousel #card-0 { transform: translateX(0) scale(1); opacity: 1; z-index: 5; box-shadow: 0 26px 60px rgba(28,33,29,0.16); pointer-events: auto; }
+  #tea-r0:checked ~ .or-carousel #card-1 { transform: translateX(230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r0:checked ~ .or-carousel #card-5 { transform: translateX(-230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r1:checked ~ .or-carousel #card-1 { transform: translateX(0) scale(1); opacity: 1; z-index: 5; box-shadow: 0 26px 60px rgba(28,33,29,0.16); pointer-events: auto; }
+  #tea-r1:checked ~ .or-carousel #card-2 { transform: translateX(230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r1:checked ~ .or-carousel #card-0 { transform: translateX(-230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r2:checked ~ .or-carousel #card-2 { transform: translateX(0) scale(1); opacity: 1; z-index: 5; box-shadow: 0 26px 60px rgba(28,33,29,0.16); pointer-events: auto; }
+  #tea-r2:checked ~ .or-carousel #card-3 { transform: translateX(230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r2:checked ~ .or-carousel #card-1 { transform: translateX(-230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r3:checked ~ .or-carousel #card-3 { transform: translateX(0) scale(1); opacity: 1; z-index: 5; box-shadow: 0 26px 60px rgba(28,33,29,0.16); pointer-events: auto; }
+  #tea-r3:checked ~ .or-carousel #card-4 { transform: translateX(230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r3:checked ~ .or-carousel #card-2 { transform: translateX(-230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r4:checked ~ .or-carousel #card-4 { transform: translateX(0) scale(1); opacity: 1; z-index: 5; box-shadow: 0 26px 60px rgba(28,33,29,0.16); pointer-events: auto; }
+  #tea-r4:checked ~ .or-carousel #card-5 { transform: translateX(230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r4:checked ~ .or-carousel #card-3 { transform: translateX(-230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r5:checked ~ .or-carousel #card-5 { transform: translateX(0) scale(1); opacity: 1; z-index: 5; box-shadow: 0 26px 60px rgba(28,33,29,0.16); pointer-events: auto; }
+  #tea-r5:checked ~ .or-carousel #card-0 { transform: translateX(230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+  #tea-r5:checked ~ .or-carousel #card-4 { transform: translateX(-230px) scale(0.90); opacity: 0.55; z-index: 3; pointer-events: auto; }
+
+  #tea-r0:checked ~ .or-carousel .or-car-dots label[for="tea-r0"] { background: #33513F; transform: scale(1.35); }
+  #tea-r1:checked ~ .or-carousel .or-car-dots label[for="tea-r1"] { background: #33513F; transform: scale(1.35); }
+  #tea-r2:checked ~ .or-carousel .or-car-dots label[for="tea-r2"] { background: #33513F; transform: scale(1.35); }
+  #tea-r3:checked ~ .or-carousel .or-car-dots label[for="tea-r3"] { background: #33513F; transform: scale(1.35); }
+  #tea-r4:checked ~ .or-carousel .or-car-dots label[for="tea-r4"] { background: #33513F; transform: scale(1.35); }
+  #tea-r5:checked ~ .or-carousel .or-car-dots label[for="tea-r5"] { background: #33513F; transform: scale(1.35); }
+
+  #tea-r0:checked ~ .or-carousel .or-car-arrow[data-show="next-0"] { display: flex; }
+  #tea-r0:checked ~ .or-carousel .or-car-arrow[data-show="prev-0"] { display: flex; }
+  #tea-r1:checked ~ .or-carousel .or-car-arrow[data-show="next-1"] { display: flex; }
+  #tea-r1:checked ~ .or-carousel .or-car-arrow[data-show="prev-1"] { display: flex; }
+  #tea-r2:checked ~ .or-carousel .or-car-arrow[data-show="next-2"] { display: flex; }
+  #tea-r2:checked ~ .or-carousel .or-car-arrow[data-show="prev-2"] { display: flex; }
+  #tea-r3:checked ~ .or-carousel .or-car-arrow[data-show="next-3"] { display: flex; }
+  #tea-r3:checked ~ .or-carousel .or-car-arrow[data-show="prev-3"] { display: flex; }
+  #tea-r4:checked ~ .or-carousel .or-car-arrow[data-show="next-4"] { display: flex; }
+  #tea-r4:checked ~ .or-carousel .or-car-arrow[data-show="prev-4"] { display: flex; }
+  #tea-r5:checked ~ .or-carousel .or-car-arrow[data-show="next-5"] { display: flex; }
+  #tea-r5:checked ~ .or-carousel .or-car-arrow[data-show="prev-5"] { display: flex; }
+
+  @media (max-width: 980px) {
+    .or-grid-snacks { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  }
+  @media (max-width: 640px) {
+    .or-grid-snacks { grid-template-columns: 1fr !important; }
+    .or-hero { flex-direction: column !important; }
+    .or-why-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+    .or-story-row { flex-direction: column !important; }
+    .or-hero-headline { font-size: 40px !important; }
+    .or-container { padding-left: 24px !important; padding-right: 24px !important; }
+    .or-section { padding-left: 24px !important; padding-right: 24px !important; }
+    .or-nav { padding-left: 24px !important; padding-right: 24px !important; flex-wrap: wrap !important; row-gap: 16px !important; }
+    .or-footer { padding-left: 24px !important; padding-right: 24px !important; flex-direction: column !important; align-items: flex-start !important; gap: 24px !important; }
+    .or-carousel { gap: 0; }
+    .or-car-arrow-slot {
+      position: absolute; top: 50%; margin-top: -16px; width: 32px; height: 32px; z-index: 25;
+    }
+    .or-car-arrow-slot:first-child { left: 2px; }
+    .or-car-arrow-slot:last-child { right: 2px; }
+    .or-car-stage { width: min(320px, 84vw); height: 470px; margin: 0 auto; }
+    .or-car-card { width: 230px; margin-left: -115px; }
+    .or-car-visual { height: 190px; }
+
+    #tea-r0:checked ~ .or-carousel #card-1,
+    #tea-r1:checked ~ .or-carousel #card-2,
+    #tea-r2:checked ~ .or-carousel #card-3,
+    #tea-r3:checked ~ .or-carousel #card-4,
+    #tea-r4:checked ~ .or-carousel #card-5,
+    #tea-r5:checked ~ .or-carousel #card-0 { transform: translateX(160px) scale(0.90); }
+
+    #tea-r0:checked ~ .or-carousel #card-5,
+    #tea-r1:checked ~ .or-carousel #card-0,
+    #tea-r2:checked ~ .or-carousel #card-1,
+    #tea-r3:checked ~ .or-carousel #card-2,
+    #tea-r4:checked ~ .or-carousel #card-3,
+    #tea-r5:checked ~ .or-carousel #card-4 { transform: translateX(-160px) scale(0.90); }
+  }
+</style>
+
+</head>
+<body>
+
+
+
+<div style="width: 100%; font-family: 'Work Sans', sans-serif; color: #1C211D; background: #F7F6F2; display: flex; flex-direction: column;">
+
+  <!-- NAV -->
+  <div class="or-nav" style="display: flex; align-items: center; justify-content: space-between; padding: 24px 48px; border-bottom: 1px solid rgba(28,33,29,0.08); flex-wrap: wrap; gap: 16px;">
+    <div style="display: flex; align-items: center;">
+      <span style="font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 24px; color: #33513F; letter-spacing: -0.01em;">openroots</span>
+    </div>
+    <nav aria-label="Primary" style="display: flex; gap: 32px; font-size: 15px; font-weight: 500;">
+      <a href="#story">Story</a>
+      <a href="#teas">Teas</a>
+      <a href="#snacks">Snacks</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+
+  <!-- HERO -->
+  <div class="or-hero or-container" style="display: flex; align-items: center; justify-content: space-between; gap: 64px; padding: 96px 48px 80px; max-width: 1280px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+    <div style="flex: 1 1 480px; min-width: 300px;">
+      <h1 class="or-hero-headline" style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 68px; line-height: 1.05; margin: 0 0 24px; max-width: 560px;">Grown from roots. Made for how you feel.</h1>
+      <p style="font-size: 19px; line-height: 1.6; color: #4D544A; max-width: 460px; margin: 0 0 36px;">Six herbal teas, each built around one outcome: calm, sleep, immunity, digestion, skin, heart. Whole roots and herbs, nothing to hide behind.</p>
+      <a href="#teas" class="or-btn-primary" style="display: inline-block; background: #33513F; color: #F7F6F2; padding: 14px 28px; border-radius: 980px; font-weight: 500; font-size: 16px; transition: background 0.2s ease;">See the range</a>
+    </div>
+    <div style="flex: 1 1 420px; min-width: 260px; display: flex; justify-content: center;">
+      <svg width="100%" height="auto" viewBox="0 0 600 700" style="max-width: 460px;" aria-hidden="true">
+        <path class="or-root-path" d="M300,680 C280,560 260,520 200,440 C170,400 140,380 90,340" stroke="#33513F" stroke-width="2" fill="none" opacity="0.5" style="animation-delay: 0s;"/>
+        <path class="or-root-path" d="M300,680 C310,560 330,500 310,420 C300,380 260,340 220,300" stroke="#AD8A5C" stroke-width="2" fill="none" opacity="0.4" style="animation-delay: 0.08s;"/>
+        <path class="or-root-path" d="M300,680 C330,580 380,540 420,460 C440,420 470,390 520,360" stroke="#33513F" stroke-width="2" fill="none" opacity="0.5" style="animation-delay: 0.16s;"/>
+        <path class="or-root-path" d="M300,680 C300,600 300,540 300,460 C300,400 310,360 300,300" stroke="#AD8A5C" stroke-width="1.5" fill="none" opacity="0.35" style="animation-delay: 0.24s;"/>
+        <path class="or-root-path" d="M90,340 C70,300 60,260 40,220" stroke="#33513F" stroke-width="1.5" fill="none" opacity="0.4" style="animation-delay: 0.4s;"/>
+        <path class="or-root-path" d="M90,340 C110,310 130,290 150,260" stroke="#33513F" stroke-width="1.5" fill="none" opacity="0.4" style="animation-delay: 0.46s;"/>
+        <path class="or-root-path" d="M220,300 C210,260 220,220 200,180" stroke="#AD8A5C" stroke-width="1.5" fill="none" opacity="0.35" style="animation-delay: 0.52s;"/>
+        <path class="or-root-path" d="M220,300 C240,270 260,250 290,220" stroke="#AD8A5C" stroke-width="1.5" fill="none" opacity="0.35" style="animation-delay: 0.58s;"/>
+        <path class="or-root-path" d="M520,360 C540,330 560,300 590,270" stroke="#33513F" stroke-width="1.5" fill="none" opacity="0.4" style="animation-delay: 0.64s;"/>
+        <path class="or-root-path" d="M520,360 C500,330 490,300 470,260" stroke="#33513F" stroke-width="1.5" fill="none" opacity="0.4" style="animation-delay: 0.7s;"/>
+        <path class="or-root-path" d="M300,300 C290,260 300,220 280,180" stroke="#33513F" stroke-width="1.5" fill="none" opacity="0.4" style="animation-delay: 0.76s;"/>
+        <path class="or-root-path" d="M300,300 C310,260 330,230 360,200" stroke="#AD8A5C" stroke-width="1.5" fill="none" opacity="0.35" style="animation-delay: 0.82s;"/>
+        <circle cx="40" cy="220" r="3.5" fill="#33513F" opacity="0.5"/>
+        <circle cx="200" cy="180" r="3.5" fill="#AD8A5C" opacity="0.4"/>
+        <circle cx="290" cy="220" r="3.5" fill="#AD8A5C" opacity="0.4"/>
+        <circle cx="280" cy="180" r="3.5" fill="#33513F" opacity="0.5"/>
+        <circle cx="360" cy="200" r="3.5" fill="#AD8A5C" opacity="0.4"/>
+        <circle cx="590" cy="270" r="3.5" fill="#33513F" opacity="0.5"/>
+        <circle cx="150" cy="260" r="3.5" fill="#33513F" opacity="0.5"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- STORY -->
+  <div id="story" class="or-section or-container" style="padding: 80px 48px 96px; max-width: 1120px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+    <div class="or-story-row" style="display: flex; gap: 80px; align-items: flex-start;">
+      <div style="flex: 1 1 560px;">
+        <h2 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 40px; margin: 0 0 28px;">Why we started</h2>
+        <p style="font-size: 17px; line-height: 1.75; color: #33382F; max-width: 620px; margin: 0 0 20px;">OpenRoots started with a plant we'd grown up around but never really thought about: a root dug up for an upset stomach, long before "adaptogen" was a word anyone used. The remedy was always there. We just hadn't paid attention to it.</p>
+        <p style="font-size: 17px; line-height: 1.75; color: #33382F; max-width: 620px; margin: 0;">We wanted to bring that same instinct indoors. Whole roots and herbs, chosen for what they actually do, not how they photograph. No proprietary blends, no fillers, no claims we can't stand behind. Six teas, each built around one outcome, steeped the way they were meant to be.</p>
+      </div>
+      <div style="flex: 1 1 240px; display: flex; justify-content: center; align-items: center;">
+        <svg width="180" height="200" viewBox="0 0 180 200" aria-hidden="true">
+          <path d="M90,190 C85,150 75,130 55,100 C45,85 35,75 15,55" stroke="#33513F" stroke-width="1.5" fill="none" opacity="0.4"/>
+          <path d="M90,190 C95,150 105,130 115,95 C120,80 130,65 150,45" stroke="#AD8A5C" stroke-width="1.5" fill="none" opacity="0.35"/>
+          <path d="M90,190 C90,150 90,120 90,80 C90,60 90,40 90,15" stroke="#33513F" stroke-width="1.5" fill="none" opacity="0.4"/>
+          <circle cx="15" cy="55" r="3" fill="#33513F" opacity="0.5"/>
+          <circle cx="150" cy="45" r="3" fill="#AD8A5C" opacity="0.4"/>
+          <circle cx="90" cy="15" r="3" fill="#33513F" opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY WE DIFFER -->
+  <div style="background: #EFEEE6; width: 100%;">
+    <div class="or-section or-container" style="padding: 88px 48px; max-width: 1200px; margin: 0 auto; box-sizing: border-box;">
+      <h2 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 40px; margin: 0 0 48px;">What makes it different</h2>
+      <div class="or-why-grid" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 56px;">
+        <div>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" style="margin-bottom: 20px;">
+            <circle cx="14" cy="14" r="11" stroke="#33513F" stroke-width="1.5"/>
+            <circle cx="14" cy="14" r="6" stroke="#33513F" stroke-width="1.5"/>
+            <circle cx="14" cy="14" r="1.5" fill="#33513F"/>
+          </svg>
+          <h3 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px; margin: 0 0 12px;">Built around outcomes, not flavours</h3>
+          <p style="font-size: 16px; line-height: 1.6; color: #4D544A; margin: 0;">Every blend starts with a single goal (calm, sleep, digestion) and the herbs are chosen to match it, not the other way round.</p>
+        </div>
+        <div>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" style="margin-bottom: 20px;">
+            <path d="M14 24V13" stroke="#33513F" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M14 13C14 13 7 13 5 5" stroke="#33513F" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M14 13C14 13 21 13 23 5" stroke="#33513F" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <h3 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px; margin: 0 0 12px;">Whole roots, nothing hiding behind them</h3>
+          <p style="font-size: 16px; line-height: 1.6; color: #4D544A; margin: 0;">No flavour dust, no "natural flavouring," no fillers bulking out the pouch. If it's in the blend, it's on the label.</p>
+        </div>
+        <div>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" style="margin-bottom: 20px;">
+            <path d="M14 25C14 25 22 17.5 22 11C22 6.03 18.42 2 14 2C9.58 2 6 6.03 6 11C6 17.5 14 25 14 25Z" stroke="#33513F" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="14" cy="11" r="3.5" stroke="#33513F" stroke-width="1.5"/>
+          </svg>
+          <h3 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px; margin: 0 0 12px;">Grown and packed close to source</h3>
+          <p style="font-size: 16px; line-height: 1.6; color: #4D544A; margin: 0;">Small batches, sourced from Indian growers, packed close to where the plants are grown rather than shipped and relabelled.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAS -->
+  <div id="teas" class="or-section or-container" style="padding: 96px 48px; max-width: 1280px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+    <h2 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 40px; margin: 0 0 12px; text-align: center;">Our teas</h2>
+    <p style="font-size: 17px; color: #4D544A; margin: 0 0 6px; text-align: center;">50g pouches, one outcome each.</p>
+    <p style="font-size: 14px; color: #8A9085; margin: 0 0 32px; text-align: center;">Use the arrows, dots, or tap a peeking card to explore the range.</p>
+
+    <input type="radio" name="tea" id="tea-r0" class="or-car-radio" checked>
+    <input type="radio" name="tea" id="tea-r1" class="or-car-radio">
+    <input type="radio" name="tea" id="tea-r2" class="or-car-radio">
+    <input type="radio" name="tea" id="tea-r3" class="or-car-radio">
+    <input type="radio" name="tea" id="tea-r4" class="or-car-radio">
+    <input type="radio" name="tea" id="tea-r5" class="or-car-radio">
+
+    <div class="or-carousel">
+      <div class="or-car-arrow-slot">
+        <label for="tea-r5" class="or-car-arrow" data-show="prev-0" aria-label="Previous tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8L10 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+        <label for="tea-r0" class="or-car-arrow" data-show="prev-1" aria-label="Previous tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8L10 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+        <label for="tea-r1" class="or-car-arrow" data-show="prev-2" aria-label="Previous tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8L10 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+        <label for="tea-r2" class="or-car-arrow" data-show="prev-3" aria-label="Previous tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8L10 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+        <label for="tea-r3" class="or-car-arrow" data-show="prev-4" aria-label="Previous tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8L10 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+        <label for="tea-r4" class="or-car-arrow" data-show="prev-5" aria-label="Previous tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8L10 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+      </div>
+
+      <div class="or-car-stage">
+
+        <label for="tea-r0" class="or-car-card" id="card-0">
+          <div class="or-car-visual" style="background: rgba(139,123,184,0.10);">
+            <svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+              <path d="M14 38C20 32 20 44 26 38C32 32 32 44 38 38C44 32 44 44 50 38C56 32 56 44 58 38" stroke="#8B7BB8" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+              <path d="M14 26C20 20 20 32 26 26C32 20 32 32 38 26C44 20 44 32 50 26C56 20 56 32 58 26" stroke="#8B7BB8" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="or-car-body">
+            <div style="width: 48px; height: 4px; border-radius: 2px; background: #8B7BB8;"></div>
+            <h3 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 24px; margin: 20px 0 4px;">Anti Stress</h3>
+            <p style="font-size: 14px; color: #5B6358; margin: 0 0 14px;">50g</p>
+            <p style="font-size: 16px; line-height: 1.55; color: #33382F; margin: 0;">A calmer, steadier kind of day.</p>
+          </div>
+        </label>
+
+        <label for="tea-r1" class="or-car-card" id="card-1">
+          <div class="or-car-visual" style="background: rgba(201,154,62,0.10);">
+            <svg width="68" height="72" viewBox="0 0 68 72" fill="none" aria-hidden="true">
+              <path d="M34 6C44 12 54 14 54 14V34C54 50 46 60 34 66C22 60 14 50 14 34V14C14 14 24 12 34 6Z" stroke="#C99A3E" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M26 36L32 42L44 28" stroke="#C99A3E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="or-car-body">
+            <div style="width: 48px; height: 4px; border-radius: 2px; background: #C99A3E;"></div>
+            <h3 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 24px; margin: 20px 0 4px;">Stay Immune</h3>
+            <p style="font-size: 14px; color: #5B6358; margin: 0 0 14px;">50g</p>
+            <p style="font-size: 16px; line-height: 1.55; color: #33382F; margin: 0;">Everyday resilience, built in.</p>
+          </div>
+        </label>
+
+        <label for="tea-r2" class="or-car-card" id="card-2">
+          <div class="or-car-visual" style="background: rgba(201,138,138,0.10);">
+            <svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+              <circle cx="36" cy="36" r="13" stroke="#C98A8A" stroke-width="1.6"/>
+              <path d="M36 8V16M36 56V64M8 36H16M56 36H64M15.5 15.5L21 21M57 57L51.5 51.5M15.5 56.5L21 51M57 15L51.5 21" stroke="#C98A8A" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="or-car-body">
+            <div style="width: 48px; height: 4px; border-radius: 2px; background: #C98A8A;"></div>
+            <h3 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 24px; margin: 20px 0 4px;">Skin Glow</h3>
+            <p style="font-size: 14px; color: #5B6358; margin: 0 0 14px;">50g</p>
+            <p style="font-size: 16px; line-height: 1.55; color: #33382F; margin: 0;">Nourishment that shows up outside.</p>
+          </div>
+        </label>
+
+        <label for="tea-r3" class="or-car-card" id="card-3">
+          <div class="or-car-visual" style="background: rgba(161,75,62,0.10);">
+            <svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+              <path d="M36 61C36 61 10 44 10 25C10 15 17 8 26 8C31 8 34.5 10.5 36 14C37.5 10.5 41 8 46 8C55 8 62 15 62 25C62 44 36 61 36 61Z" stroke="#A14B3E" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M20 22C20 22 24 14 32 14" stroke="#A14B3E" stroke-width="1.3" stroke-linecap="round" opacity="0.45"/>
+            </svg>
+          </div>
+          <div class="or-car-body">
+            <div style="width: 48px; height: 4px; border-radius: 2px; background: #A14B3E;"></div>
+            <h3 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 24px; margin: 20px 0 4px;">Heart Care</h3>
+            <p style="font-size: 14px; color: #5B6358; margin: 0 0 14px;">50g</p>
+            <p style="font-size: 16px; line-height: 1.55; color: #33382F; margin: 0;">Steady, mindful, heart-first.</p>
+          </div>
+        </label>
+
+        <label for="tea-r4" class="or-car-card" id="card-4">
+          <div class="or-car-visual" style="background: rgba(111,143,91,0.10);">
+            <svg width="70" height="70" viewBox="0 0 70 70" fill="none" aria-hidden="true">
+              <path d="M35 62C35 62 14 52 14 30C14 16 24 8 35 8C46 8 56 16 56 30C56 52 35 62 35 62Z" stroke="#6F8F5B" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M35 62V24" stroke="#6F8F5B" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="or-car-body">
+            <div style="width: 48px; height: 4px; border-radius: 2px; background: #6F8F5B;"></div>
+            <h3 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 24px; margin: 20px 0 4px;">Happy Gut</h3>
+            <p style="font-size: 14px; color: #5B6358; margin: 0 0 14px;">50g</p>
+            <p style="font-size: 16px; line-height: 1.55; color: #33382F; margin: 0;">Settle in, digest with ease.</p>
+          </div>
+        </label>
+
+        <label for="tea-r5" class="or-car-card" id="card-5">
+          <div class="or-car-visual" style="background: rgba(62,75,122,0.10);">
+            <svg width="70" height="70" viewBox="0 0 70 70" fill="none" aria-hidden="true">
+              <path d="M44 10C34 14 28 24 28 35C28 50 40 60 54 58C48 64 38 66 29 63C16 59 8 46 11 32C14 19 26 10 40 10C41.5 10 42.8 10 44 10Z" stroke="#3E4B7A" stroke-width="1.6" stroke-linejoin="round"/>
+              <circle cx="54" cy="16" r="1.6" fill="#3E4B7A"/>
+              <circle cx="60" cy="26" r="1.2" fill="#3E4B7A"/>
+              <circle cx="48" cy="22" r="1" fill="#3E4B7A"/>
+            </svg>
+          </div>
+          <div class="or-car-body">
+            <div style="width: 48px; height: 4px; border-radius: 2px; background: #3E4B7A;"></div>
+            <h3 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 24px; margin: 20px 0 4px;">Deep Sleep</h3>
+            <p style="font-size: 14px; color: #5B6358; margin: 0 0 14px;">50g</p>
+            <p style="font-size: 16px; line-height: 1.55; color: #33382F; margin: 0;">Wind down, properly this time.</p>
+          </div>
+        </label>
+
+      </div>
+
+      <div class="or-car-arrow-slot">
+        <label for="tea-r1" class="or-car-arrow" data-show="next-0" aria-label="Next tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3L11 8L6 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+        <label for="tea-r2" class="or-car-arrow" data-show="next-1" aria-label="Next tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3L11 8L6 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+        <label for="tea-r3" class="or-car-arrow" data-show="next-2" aria-label="Next tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3L11 8L6 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+        <label for="tea-r4" class="or-car-arrow" data-show="next-3" aria-label="Next tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3L11 8L6 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+        <label for="tea-r5" class="or-car-arrow" data-show="next-4" aria-label="Next tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3L11 8L6 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+        <label for="tea-r0" class="or-car-arrow" data-show="next-5" aria-label="Next tea"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3L11 8L6 13" stroke="#33513F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></label>
+      </div>
+    </div>
+
+    <div class="or-car-dots">
+      <label for="tea-r0" class="or-car-dot" aria-label="Go to Anti Stress"></label>
+      <label for="tea-r1" class="or-car-dot" aria-label="Go to Stay Immune"></label>
+      <label for="tea-r2" class="or-car-dot" aria-label="Go to Skin Glow"></label>
+      <label for="tea-r3" class="or-car-dot" aria-label="Go to Heart Care"></label>
+      <label for="tea-r4" class="or-car-dot" aria-label="Go to Happy Gut"></label>
+      <label for="tea-r5" class="or-car-dot" aria-label="Go to Deep Sleep"></label>
+    </div>
+  </div>
+
+  <!-- SNACKS -->
+  <div style="background: #EFEDE4; width: 100%;">
+    <div id="snacks" class="or-section or-container" style="padding: 96px 48px; max-width: 1280px; margin: 0 auto; box-sizing: border-box;">
+      <h2 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 40px; margin: 0 0 12px;">Beyond the cup</h2>
+      <p style="font-size: 17px; color: #4D544A; max-width: 600px; margin: 0 0 48px;">Snacks held to the same standard: short ingredient lists, real nutrition, nothing you can't pronounce.</p>
+      <div class="or-grid-snacks" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px;">
+
+        <div style="padding: 36px; border: 1px solid rgba(28,33,29,0.08); border-radius: 20px; background: #FFFFFF; display: flex; flex-direction: column;">
+          <div style="width: 48px; height: 4px; border-radius: 2px; background: #AD8A5C;"></div>
+          <h3 style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 24px; margin: 20px 0 10px;">Roasted Edamame</h3>
+          <p style="font-size: 16px; line-height: 1.55; color: #33382F; margin: 0;">Protein-forward, oven-roasted, lightly salted. No oil bath, no mystery seasoning, just the bean.</p>
+        </div>
+
+        <div style="padding: 36px; border: 1px dashed rgba(28,33,29,0.18); border-radius: 20px; display: flex; align-items: center; justify-content: center; text-align: center;">
+          <p style="font-size: 15px; color: #6B6F63; margin: 0;">More snacks, coming soon</p>
+        </div>
+
+        <div style="padding: 36px; border: 1px dashed rgba(28,33,29,0.18); border-radius: 20px; display: flex; align-items: center; justify-content: center; text-align: center;">
+          <p style="font-size: 15px; color: #6B6F63; margin: 0;">More snacks, coming soon</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div id="contact" class="or-footer" style="display: flex; align-items: center; justify-content: space-between; padding: 40px 48px; border-top: 1px solid rgba(28,33,29,0.08); max-width: 1280px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <div style="display: flex; align-items: center;">
+        <span style="font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 18px; color: #33513F; letter-spacing: -0.01em;">openroots</span>
+      </div>
+      <p style="font-size: 13px; color: #5B6358; margin: 4px 0 0;">Rooted in whole herbs.</p>
+    </div>
+    <div style="font-size: 13px; color: #5B6358; text-align: right;">
+      <p style="margin: 0;"><a href="mailto:careopenroots@gmail.com">careopenroots@gmail.com</a></p>
+      <p style="margin: 4px 0 0;">© 2026 openroots. All rights reserved.</p>
+    </div>
+  </div>
+
+</div>
+
+
+</body>
+</html>
