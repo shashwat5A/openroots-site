@@ -1,7 +1,7 @@
 // openroots: cart, drawer and checkout
 (function () { try {
   // ---- Settings: edit prices and delivery here ----
-  var PRICES = { 'anti-stress': 399, 'deep-sleep': 399, 'happy-gut': 399, 'heart-care': 399, 'skin-glow': 399, 'stay-immune': 399 }; // placeholder prices in rupees
+  var PRICES = { 'anti-stress': 9, 'deep-sleep': 399, 'happy-gut': 399, 'heart-care': 399, 'skin-glow': 399, 'stay-immune': 399 }; // placeholder prices in rupees
   var FREE_SHIPPING_FROM = 599;   // free delivery at or above this subtotal
   var SHIPPING_FEE = 49;          // delivery fee below the threshold
   var MAX_QTY = 10;
