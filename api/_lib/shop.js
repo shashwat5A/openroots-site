@@ -1,5 +1,8 @@
 // Shared shop rules and Razorpay helpers. Prices always come from the products table, never the browser.
 import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
+import { sendOrderConfirmation } from './notify.js';
+import { sendWhatsAppConfirmation } from './whatsapp.js';
+import { issueInvoice, invoiceUrl } from './invoice.js';
 
 export const FREE_SHIPPING_FROM_PAISE = 59900; // free delivery from ₹599 (keep in sync with cart.js)
 export const SHIPPING_FEE_PAISE = 4900;        // ₹49 below that
@@ -28,7 +31,7 @@ export function validateCheckout(body) {
   const a = b.address && typeof b.address === 'object' ? b.address : {};
   const phone = str(c.phone).replace(/\D/g, '').replace(/^(91|0)(?=\d{10}$)/, '');
   const data = {
-    customer: { name: str(c.name), email: str(c.email).toLowerCase(), phone, news: c.news === true },
+    customer: { name: str(c.name), email: str(c.email).toLowerCase(), phone, news: c.news === true, whatsapp: c.whatsapp === true },
     address: { line1: str(a.line1), line2: str(a.line2), city: str(a.city), state: str(a.state), pin: str(a.pin) },
     items: [],
   };
@@ -52,6 +55,10 @@ export function validateCheckout(body) {
   if (data.address.line2.length > 160) errors.line2 = 'Please shorten this.';
   if (data.address.city.length < 2 || data.address.city.length > 60) errors.city = 'Please enter your city.';
   if (!STATES.includes(data.address.state)) errors.state = 'Please choose your state.';
+  const latin = /^[\x20-\x7E\u00C0-\u017F]*$/;
+  for (const [k, v] of [['name', data.customer.name], ['line1', data.address.line1], ['line2', data.address.line2], ['city', data.address.city]]) {
+    if (!errors[k] && !latin.test(v)) errors[k] = 'Please type this in English letters, so our courier can read it.';
+  }
   if (!/^[1-9]\d{5}$/.test(data.address.pin)) errors.pin = 'PIN code must be 6 digits.';
   return { data, errors };
 }
@@ -129,5 +136,10 @@ export async function recordPayment(sql, payment) {
   }
   if (!amountOk && finalStatus !== 'failed') console.error('Payment amount does not match order total', { payment: payment.id, order: order.id });
   const [after] = await sql`SELECT order_ref, status FROM orders WHERE id = ${order.id}`;
-  return { found: true, amountOk, order_ref: after.order_ref, order_status: after.status };
+  if (after.status === 'paid') {
+    try { await issueInvoice(sql, order.id); } catch (e) { console.error('invoice step failed', e); }
+    try { await sendOrderConfirmation(sql, order.id); } catch (e) { console.error('confirmation email step failed', e); }
+    try { await sendWhatsAppConfirmation(sql, order.id); } catch (e) { console.error('confirmation WhatsApp step failed', e); }
+  }
+  return { found: true, amountOk, order_ref: after.order_ref, order_status: after.status, invoice_url: after.status === 'paid' ? invoiceUrl(after.order_ref) : null };
 }
