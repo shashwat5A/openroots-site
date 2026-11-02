@@ -358,6 +358,6 @@
 (function () { try {
   if (document.querySelector('script[src*="cart.js"]')) return;
   var s = document.createElement('script');
-  s.src = 'cart.js?v=17';
+  s.src = 'cart.js?v=21';
   document.body.appendChild(s);
 } catch (err) {} })();
