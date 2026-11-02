@@ -179,7 +179,8 @@
         '<div class="ship-meter__bar"><span style="width:' + pct + '%"></span></div></div>' +
       '<dl class="totals"><div><dt>Subtotal</dt><dd>' + inr(sub) + '</dd></div>' +
       '<div><dt>Delivery</dt><dd>' + (sh ? inr(sh) : 'Free') + '</dd></div>' +
-      '<div class="totals__grand"><dt>Total</dt><dd>' + inr(total()) + '</dd></div></dl>';
+      '<div class="totals__grand"><dt>Total</dt><dd>' + inr(total()) + '</dd></div></dl>' +
+      '<div class="gst-note">Prices include GST</div>';
   }
 
   function itemsHTML(compact) {
@@ -228,6 +229,7 @@
         '<div class="cdone__title">Your teas are on their way to being packed.</div>' +
         '<div class="cdone__ref">Order number <b>' + esc(o.order_ref || '') + '</b></div>' +
         '<p>We\u2019ll send delivery updates to <b>' + esc(o.email || '') + '</b> and <b>+91 ' + esc(o.phone || '') + '</b>. Keep your order number handy if you need to reach us.</p>' +
+        (o.invoice_url ? '<a class="cbtn cbtn--gold" href="' + esc(o.invoice_url) + '" target="_blank" rel="noopener">View / download GST invoice</a>' : '') +
         (o.pending ? '<div class="soon"><b>Still confirming with the bank.</b> Your payment went through on your side. Please don\u2019t pay again; we\u2019ll confirm shortly.</div>' : '') +
         '</div>';
       footEl.innerHTML = '<button type="button" class="cbtn cbtn--primary cbtn--block" data-browse>Back to the teas</button>' +
@@ -265,7 +267,8 @@
           '<div class="fld-row fld-row--3">' + field('pin', 'PIN code', 'type="text" inputmode="numeric" autocomplete="postal-code" maxlength="6" placeholder="6 digits" required') +
           field('city', 'City', 'type="text" autocomplete="address-level2" required') +
           field('state', 'State', 'autocomplete="address-level1" required', 'select') + '</div>' +
-        '</fieldset><label class="chk"><input type="checkbox" id="f-news"' + (details.news ? ' checked' : '') + '> Send me news about new blends (optional)</label></form>';
+        '</fieldset><label class="chk"><input type="checkbox" id="f-wa"' + (details.wa === false ? '' : ' checked') + '> Send my order updates on WhatsApp</label>' +
+          '<label class="chk"><input type="checkbox" id="f-news"' + (details.news ? ' checked' : '') + '> Send me news about new blends (optional)</label></form>';
       footEl.innerHTML = '<dl class="totals totals--slim"><div class="totals__grand"><dt>Total</dt><dd>' + inr(total()) + '</dd></div></dl>' +
         '<button type="submit" form="cform" class="cbtn cbtn--primary cbtn--block">Review order</button>';
       wireForm();
@@ -307,9 +310,11 @@
     city: function (v) { return v.trim().length >= 2 ? '' : 'Please enter your city.'; },
     state: function (v) { return v ? '' : 'Please choose your state.'; }
   };
+  var LATIN = /^[\x20-\x7E\u00C0-\u017F]*$/;
   function check(id, show) {
     var el = document.getElementById('f-' + id);
     var msg = RULES[id](el.value);
+    if (!msg && ['name', 'line1', 'line2', 'city'].indexOf(id) > -1 && !LATIN.test(el.value)) msg = 'Please type this in English letters, so our courier can read it.';
     if (show) {
       el.setAttribute('aria-invalid', msg ? 'true' : 'false');
       el.setAttribute('aria-describedby', 'e-' + id);
@@ -331,6 +336,7 @@
       });
     });
     document.getElementById('f-news').addEventListener('change', function (e) { details.news = e.target.checked; save(DKEY, details); });
+    document.getElementById('f-wa').addEventListener('change', function (e) { details.wa = e.target.checked; save(DKEY, details); });
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var firstBad = null;
@@ -349,7 +355,7 @@
       ref: 'OR-' + Date.now().toString(36).toUpperCase(),
       items: Object.keys(cart).map(function (k) { return { id: k, name: NAMES[k], qty: cart[k], price: PRICES[k] }; }),
       subtotal: subtotal(), shipping: shipping(), total: total(),
-      customer: { name: details.name, phone: details.phone, email: details.email, news: !!details.news },
+      customer: { name: details.name, phone: details.phone, email: details.email, news: !!details.news, whatsapp: details.wa !== false },
       address: { line1: details.line1, line2: details.line2 || '', city: details.city, state: details.state, pin: details.pin }
     };
   }
@@ -410,11 +416,18 @@
         prefill: ord.prefill,
         notes: { order_ref: ord.order_ref },
         theme: { color: '#2E3D28' },
-        modal: { ondismiss: function () { if (paying) payFail(payError || 'Payment cancelled. Your cart is saved, so you can try again.'); } },
+        modal: { ondismiss: function () {
+          if (!paying || finished) return;
+          // Before calling it cancelled, ask the server whether the payment actually went through.
+          payError = ''; render();
+          checkStatus().then(function (paid) { if (!paid && !finished) payFail(lastFailure || 'Payment not completed. If money left your account, it will show here shortly or be refunded automatically. Your cart is saved.'); });
+        } },
         handler: function (resp) {
+          if (finished) return;
+          finished = true; stopPolling();
           paying = true; payError = ''; render();
           post('/api/orders/verify', resp).then(function (v) {
-            lastOrder = { order_ref: ord.order_ref, email: o.customer.email, phone: o.customer.phone, pending: !v.ok };
+            lastOrder = { order_ref: ord.order_ref, email: o.customer.email, phone: o.customer.phone, pending: !v.ok, invoice_url: v.invoice_url || null };
             paying = false;
             cart = {}; save(KEY, cart); sync();
             go('done');
@@ -424,9 +437,25 @@
           });
         }
       });
+      var finished = false, lastFailure = '', pollTimer = null, polls = 0, finishInvoice = null;
+      function finish(pending) {
+        if (finished) return; finished = true; stopPolling();
+        try { rzp.close(); } catch (e) {}
+        lastOrder = { order_ref: ord.order_ref, email: o.customer.email, phone: o.customer.phone, pending: !!pending, invoice_url: finishInvoice };
+        paying = false; cart = {}; save(KEY, cart); sync(); go('done');
+      }
+      function checkStatus() {
+        return fetch('/api/orders/status?ref=' + encodeURIComponent(ord.order_ref), { headers: { Accept: 'application/json' } })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (s) { if (s && s.paid) { finishInvoice = s.invoice_url || null; finish(false); return true; } return false; })
+          .catch(function () { return false; });
+      }
+      function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+      // Safety net: while the payment window is open, check every 5 seconds whether Razorpay has the money.
+      pollTimer = setInterval(function () { polls++; if (polls > 120) return stopPolling(); checkStatus(); }, 5000);
       rzp.on('payment.failed', function (r) {
         var d = (r && r.error && r.error.description) || 'The payment didn\u2019t go through.';
-        payError = d + ' No money was taken. You can try again.';
+        lastFailure = d + ' No money was taken. You can try again.';
       });
       rzp.open();
     }).catch(function () { payFail('We couldn\u2019t reach the payment service. Check your connection and try again, or order on WhatsApp.'); });
